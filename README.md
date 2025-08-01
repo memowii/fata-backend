@@ -23,9 +23,26 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+FATA Backend - A NestJS-based backend service for the "From Article to Audio" application.
 
-## Project setup
+## Quick Start with Docker
+
+The easiest way to run this application is using Docker:
+
+```bash
+# Initial setup
+make install
+
+# Start development server
+make up
+
+# Or use docker compose directly
+docker compose up
+```
+
+See [DOCKER.md](./DOCKER.md) for detailed Docker instructions.
+
+## Project setup (Without Docker)
 
 ```bash
 $ yarn install

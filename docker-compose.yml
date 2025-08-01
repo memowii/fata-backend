@@ -1,0 +1,128 @@
+services:
+  # Development service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: fata-backend-dev
+    restart: unless-stopped
+    ports:
+      - "${PORT:-5000}:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=${PORT:-5000}
+    env_file:
+      - .env
+    volumes:
+      # Mount source code for hot reload
+      - ./src:/usr/src/app/src
+      - ./test:/usr/src/app/test
+      # Mount config files
+      - ./tsconfig.json:/usr/src/app/tsconfig.json
+      - ./tsconfig.build.json:/usr/src/app/tsconfig.build.json
+      - ./nest-cli.json:/usr/src/app/nest-cli.json
+      # Prevent node_modules from being overwritten by volume mount
+      - /usr/src/app/node_modules
+    command: yarn start:dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fata-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Production-like service (optional, for testing production builds locally)
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: fata-backend-prod
+    restart: unless-stopped
+    ports:
+      - "${PROD_PORT:-5001}:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT:-5000}
+    env_file:
+      - .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fata-network
+    profiles:
+      - production
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL 16 database
+  postgres:
+    image: postgres:16-alpine
+    container_name: fata-postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-fata_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-fata_password}
+      - POSTGRES_DB=${POSTGRES_DB:-fata_db}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Optional: mount initialization scripts
+      # - ./scripts/init-db:/docker-entrypoint-initdb.d
+    networks:
+      - fata-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fata_user} -d ${POSTGRES_DB:-fata_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis cache/session service
+  redis:
+    image: redis:7-alpine
+    container_name: fata-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD:-fata_redis_password}
+    volumes:
+      - redis-data:/data
+    networks:
+      - fata-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+networks:
+  fata-network:
+    driver: bridge
+
+# Volumes for persistent data
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  fata-data:
+    driver: local

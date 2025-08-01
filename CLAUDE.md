@@ -54,7 +54,7 @@ yarn test:debug
 
 ### Core Structure
 - **NestJS Application**: Built on the modular architecture pattern
-- **Entry Point**: `src/main.ts` - Bootstraps the application on port from `PORT` env variable or 3001
+- **Entry Point**: `src/main.ts` - Bootstraps the application on port from `PORT` env variable or 5000
 - **Root Module**: `src/app.module.ts` - Main application module with ConfigModule for environment variables
 - **Configuration**: Uses `@nestjs/config` for environment variable management
 
