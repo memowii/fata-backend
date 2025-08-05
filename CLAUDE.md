@@ -4,11 +4,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a NestJS backend application (fata-backend) built with TypeScript. It uses the NestJS framework for building scalable Node.js server-side applications.
+This is a NestJS backend application (fata-backend) built with TypeScript. It uses the NestJS framework for building scalable Node.js server-side applications. The project is containerized with Docker and includes PostgreSQL 16 and Redis for data persistence and caching.
 
 ## Common Development Commands
 
-### Running the Application
+### Docker Commands (Recommended)
+```bash
+# Start development containers (PostgreSQL, Redis, and app)
+make up
+# or
+docker compose up
+
+# Start in detached mode
+make up-d
+
+# Stop containers
+make down
+
+# Access container shell
+make shell
+
+# View logs
+make logs
+```
+
+### Running the Application (Local Development)
 ```bash
 # Development with hot reload
 yarn start:dev
@@ -34,7 +54,13 @@ yarn format
 
 ### Testing
 ```bash
-# Run unit tests
+# Run tests in Docker container (recommended)
+make test
+make test-watch
+make test-cov
+make test-e2e
+
+# Run unit tests locally
 yarn test
 
 # Run tests in watch mode
@@ -64,6 +90,10 @@ yarn test:debug
 - **Testing**: Jest for unit/integration tests
 - **Build Tool**: NestJS CLI with SWC compiler
 - **Package Manager**: Yarn 1.22
+- **Containerization**: Docker with multi-stage builds
+- **Database**: PostgreSQL 16
+- **Cache**: Redis
+- **Development**: Docker Compose for local development environment
 
 ### Module Pattern
 NestJS uses a modular architecture where functionality is organized into modules. Each module typically contains:
@@ -73,3 +103,20 @@ NestJS uses a modular architecture where functionality is organized into modules
 
 ### Environment Configuration
 The application uses ConfigModule for environment management. Set environment variables in a `.env` file at the project root.
+
+### Docker Setup
+The project includes a complete Docker setup with:
+- **Development container** with hot reload and volume mounting
+- **Production-optimized container** with multi-stage builds
+- **PostgreSQL 16** database container
+- **Redis** cache container
+- **Docker Compose** configuration for easy local development
+- **Makefile** with convenient commands for Docker operations
+
+To get started with Docker:
+1. Copy the environment file: `make env-copy` or `cp .env.example .env`
+2. Start the development environment: `make up` or `docker compose up`
+3. The application will be available at `http://localhost:5000`
+4. PostgreSQL at `localhost:5432` and Redis at `localhost:6379`
+
+See `DOCKER.md` for detailed Docker documentation and `Makefile` for available commands.
