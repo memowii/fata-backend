@@ -61,3 +61,10 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Symbolic links
 documentation
+
+# Prisma
+/generated
+*.db
+*.db-journal
+prisma/*.db
+prisma/*.db-journal
