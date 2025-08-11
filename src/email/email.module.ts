@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { EmailService } from './email.service';
 import { EmailProcessor } from './email.processor';
+import { SESProvider } from './providers/ses.provider';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { EmailProcessor } from './email.processor';
       },
     }),
   ],
-  providers: [EmailService, EmailProcessor],
-  exports: [EmailService],
+  providers: [EmailService, EmailProcessor, SESProvider],
+  exports: [EmailService, SESProvider],
 })
 export class EmailModule {}
