@@ -179,3 +179,9 @@ logs-db: ## Show PostgreSQL logs
 .PHONY: logs-redis
 logs-redis: ## Show Redis logs
 	$(DOCKER_COMPOSE) logs -f redis
+
+.PHONY: update-api-docs
+update-api-docs: ## Download OpenAPI spec to documentation folder
+	@mkdir -p documentation
+	curl -s http://localhost:5000/api-json | jq '.' > documentation/api-docs.json
+	@echo "$(GREEN)API documentation updated at documentation/api-docs.json$(NC)"
