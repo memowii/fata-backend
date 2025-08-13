@@ -83,6 +83,7 @@ yarn test:debug
 - **Entry Point**: `src/main.ts` - Bootstraps the application on port from `PORT` env variable or 5000
 - **Root Module**: `src/app.module.ts` - Main application module with ConfigModule for environment variables
 - **Configuration**: Uses `@nestjs/config` for environment variable management
+- **API Versioning**: Uses URL-based versioning with `/api/v1` prefix for all endpoints
 
 ### Key Technologies
 - **Framework**: NestJS 11.x with Express adapter
@@ -146,9 +147,11 @@ See `DOCKER.md` for detailed Docker documentation and `Makefile` for available c
 - **Always verify**: Check logs for "MessageId" to confirm SES sending
 
 ### API Endpoints
-- **Base path is /auth not /api/auth**: Register endpoint is `POST /auth/register`
-- **Swagger docs**: Available at `http://localhost:5000/api`
-- **Raw API spec**: Available at `http://localhost:5000/api-json`
+- **API Version**: All endpoints use `/api/v1` prefix for versioning
+- **Base path**: Register endpoint is `POST /api/v1/auth/register`
+- **Swagger docs**: Available at `http://localhost:5000/api/v1`
+- **Raw API spec**: Available at `http://localhost:5000/api/v1-json`
+- **Versioning Strategy**: API uses URL-based versioning (e.g., `/api/v1`, `/api/v2`)
 
 ### Docker Volume Mounting
 - **package.json and yarn.lock need special handling**: Use delegated mounts

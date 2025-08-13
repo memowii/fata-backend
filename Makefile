@@ -183,5 +183,5 @@ logs-redis: ## Show Redis logs
 .PHONY: update-api-docs
 update-api-docs: ## Download OpenAPI spec to documentation folder
 	@mkdir -p documentation
-	curl -s http://localhost:5000/api-json | jq '.' > documentation/api-docs.json
-	@echo "$(GREEN)API documentation updated at documentation/api-docs.json$(NC)"
+	curl -s http://localhost:5000/api/v1-json | jq '.' > documentation/api-docs-v1.json
+	@echo "$(GREEN)API v1 documentation updated at documentation/api-docs-v1.json$(NC)"

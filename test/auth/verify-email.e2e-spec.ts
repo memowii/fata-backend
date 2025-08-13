@@ -26,6 +26,7 @@ describe('Email Verification (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -60,7 +61,7 @@ describe('Email Verification (e2e)', () => {
     });
   });
 
-  describe('POST /auth/verify-email', () => {
+  describe('POST /api/v1/auth/verify-email', () => {
     beforeEach(async () => {
       // Create an unverified user with verification token
       await prismaService.user.create({
@@ -80,7 +81,7 @@ describe('Email Verification (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/verify-email')
+        .post('/api/v1/auth/verify-email')
         .send(verifyDto)
         .expect(200);
 
@@ -100,7 +101,7 @@ describe('Email Verification (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/verify-email')
+        .post('/api/v1/auth/verify-email')
         .send(verifyDto)
         .expect(400);
 
@@ -116,7 +117,7 @@ describe('Email Verification (e2e)', () => {
     it('should handle already verified email', async () => {
       // First verification
       await request(app.getHttpServer())
-        .post('/auth/verify-email')
+        .post('/api/v1/auth/verify-email')
         .send({ token: validToken })
         .expect(200);
 
@@ -133,7 +134,7 @@ describe('Email Verification (e2e)', () => {
 
       // Try to verify again
       const response = await request(app.getHttpServer())
-        .post('/auth/verify-email')
+        .post('/api/v1/auth/verify-email')
         .send({ token: validToken })
         .expect(200);
 
@@ -146,14 +147,14 @@ describe('Email Verification (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/auth/verify-email')
+        .post('/api/v1/auth/verify-email')
         .send(verifyDto)
         .expect(400);
     });
 
     it('should reject missing token', async () => {
       await request(app.getHttpServer())
-        .post('/auth/verify-email')
+        .post('/api/v1/auth/verify-email')
         .send({})
         .expect(400);
     });
@@ -164,7 +165,7 @@ describe('Email Verification (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/verify-email')
+        .post('/api/v1/auth/verify-email')
         .send(verifyDto)
         .expect(400);
 
@@ -174,7 +175,7 @@ describe('Email Verification (e2e)', () => {
     it('should allow login after email verification', async () => {
       // Verify email first
       await request(app.getHttpServer())
-        .post('/auth/verify-email')
+        .post('/api/v1/auth/verify-email')
         .send({ token: validToken })
         .expect(200);
 
@@ -185,7 +186,7 @@ describe('Email Verification (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send(loginDto)
         .expect(200);
 
@@ -201,7 +202,7 @@ describe('Email Verification (e2e)', () => {
       // Send multiple concurrent requests
       const requests = Array(5).fill(null).map(() =>
         request(app.getHttpServer())
-          .post('/auth/verify-email')
+          .post('/api/v1/auth/verify-email')
           .send(verifyDto)
       );
 
@@ -229,7 +230,7 @@ describe('Email Verification (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/auth/verify-email')
+        .post('/api/v1/auth/verify-email')
         .send(verifyDto)
         .expect(400);
     });
@@ -245,14 +246,14 @@ describe('Email Verification (e2e)', () => {
 
       for (const token of specialTokens) {
         await request(app.getHttpServer())
-          .post('/auth/verify-email')
+          .post('/api/v1/auth/verify-email')
           .send({ token })
           .expect(400);
       }
     });
   });
 
-  describe('POST /auth/resend-verification', () => {
+  describe('POST /api/v1/auth/resend-verification', () => {
     beforeEach(async () => {
       // Create an unverified user
       await prismaService.user.create({
@@ -268,7 +269,7 @@ describe('Email Verification (e2e)', () => {
 
     it('should resend verification email for unverified user', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/resend-verification')
+        .post('/api/v1/auth/resend-verification')
         .query({ email: testUser.email })
         .expect(200);
 
@@ -290,7 +291,7 @@ describe('Email Verification (e2e)', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .post('/auth/resend-verification')
+        .post('/api/v1/auth/resend-verification')
         .query({ email: testUser.email })
         .expect(200);
 
@@ -299,27 +300,27 @@ describe('Email Verification (e2e)', () => {
 
     it('should return error for non-existent user', async () => {
       await request(app.getHttpServer())
-        .post('/auth/resend-verification')
+        .post('/api/v1/auth/resend-verification')
         .query({ email: 'nonexistent@example.com' })
         .expect(404);
     });
 
     it('should handle missing email parameter', async () => {
       await request(app.getHttpServer())
-        .post('/auth/resend-verification')
+        .post('/api/v1/auth/resend-verification')
         .expect(400);
     });
 
     it('should handle invalid email format', async () => {
       await request(app.getHttpServer())
-        .post('/auth/resend-verification')
+        .post('/api/v1/auth/resend-verification')
         .query({ email: 'invalid-email' })
         .expect(400);
     });
 
     it('should be case-insensitive for email', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/resend-verification')
+        .post('/api/v1/auth/resend-verification')
         .query({ email: 'VERIFY.TEST@EXAMPLE.COM' })
         .expect(200);
 
@@ -330,7 +331,7 @@ describe('Email Verification (e2e)', () => {
       // Send multiple rapid requests
       const requests = Array(10).fill(null).map(() =>
         request(app.getHttpServer())
-          .post('/auth/resend-verification')
+          .post('/api/v1/auth/resend-verification')
           .query({ email: testUser.email })
       );
 

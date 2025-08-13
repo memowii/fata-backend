@@ -23,6 +23,7 @@ describe('Auth Login (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -65,7 +66,7 @@ describe('Auth Login (e2e)', () => {
     });
   });
 
-  describe('POST /auth/login', () => {
+  describe('POST /api/v1/auth/login', () => {
     it('should successfully login with valid credentials', async () => {
       const loginDto = {
         email: testUser.email,
@@ -73,7 +74,7 @@ describe('Auth Login (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send(loginDto)
         .expect(200);
 
@@ -98,7 +99,7 @@ describe('Auth Login (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send(loginDto)
         .expect(401);
 
@@ -112,7 +113,7 @@ describe('Auth Login (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send(loginDto)
         .expect(401);
 
@@ -136,7 +137,7 @@ describe('Auth Login (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send(loginDto)
         .expect(403);
 
@@ -152,14 +153,14 @@ describe('Auth Login (e2e)', () => {
       // Make multiple failed login attempts
       for (let i = 0; i < 5; i++) {
         await request(app.getHttpServer())
-          .post('/auth/login')
+          .post('/api/v1/auth/login')
           .send(loginDto)
           .expect(401);
       }
 
       // Account should now be locked
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUser.email,
           password: testUser.password, // Even with correct password
@@ -176,7 +177,7 @@ describe('Auth Login (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send(loginDto)
         .expect(200);
 
@@ -186,19 +187,19 @@ describe('Auth Login (e2e)', () => {
     it('should reject login with missing credentials', async () => {
       // Missing email
       await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({ password: testUser.password })
         .expect(400);
 
       // Missing password
       await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({ email: testUser.email })
         .expect(400);
 
       // Empty body
       await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({})
         .expect(400);
     });
@@ -210,7 +211,7 @@ describe('Auth Login (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send(loginDto)
         .expect(400);
 
@@ -224,7 +225,7 @@ describe('Auth Login (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send(loginDto)
         .expect(200);
 
@@ -246,7 +247,7 @@ describe('Auth Login (e2e)', () => {
         };
 
         await request(app.getHttpServer())
-          .post('/auth/login')
+          .post('/api/v1/auth/login')
           .send(loginDto)
           .expect((res) => {
             expect([400, 401]).toContain(res.status);
@@ -267,14 +268,14 @@ describe('Auth Login (e2e)', () => {
       // Make some failed attempts (but not enough to lock)
       for (let i = 0; i < 3; i++) {
         await request(app.getHttpServer())
-          .post('/auth/login')
+          .post('/api/v1/auth/login')
           .send(loginDto)
           .expect(401);
       }
 
       // Successful login should reset attempts
       await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUser.email,
           password: testUser.password,
@@ -297,7 +298,7 @@ describe('Auth Login (e2e)', () => {
       // Send multiple concurrent requests
       const requests = Array(5).fill(null).map(() =>
         request(app.getHttpServer())
-          .post('/auth/login')
+          .post('/api/v1/auth/login')
           .send(loginDto)
       );
 
@@ -313,7 +314,7 @@ describe('Auth Login (e2e)', () => {
     it('should return consistent error messages for security', async () => {
       // Non-existent user
       const response1 = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'nonexistent@example.com',
           password: 'AnyPassword123!',
@@ -322,7 +323,7 @@ describe('Auth Login (e2e)', () => {
 
       // Existing user with wrong password
       const response2 = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUser.email,
           password: 'WrongPassword123!',
@@ -343,7 +344,7 @@ describe('Auth Login (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send(loginDto)
         .expect((res) => {
           expect([400, 401]).toContain(res.status);
@@ -361,7 +362,7 @@ describe('Auth Login (e2e)', () => {
       // Make many rapid requests
       const requests = Array(20).fill(null).map(() =>
         request(app.getHttpServer())
-          .post('/auth/login')
+          .post('/api/v1/auth/login')
           .send(loginDto)
       );
 

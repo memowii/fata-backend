@@ -27,6 +27,7 @@ describe('Password Reset (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -72,14 +73,14 @@ describe('Password Reset (e2e)', () => {
     });
   });
 
-  describe('POST /auth/forgot-password', () => {
+  describe('POST /api/v1/auth/forgot-password', () => {
     it('should handle forgot password request for existing user', async () => {
       const forgotDto = {
         email: testUser.email,
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send(forgotDto)
         .expect(200);
 
@@ -102,7 +103,7 @@ describe('Password Reset (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send(forgotDto)
         .expect(200);
 
@@ -119,7 +120,7 @@ describe('Password Reset (e2e)', () => {
 
       // First request
       await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send(forgotDto)
         .expect(200);
 
@@ -130,7 +131,7 @@ describe('Password Reset (e2e)', () => {
 
       // Second request should generate new token
       await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send(forgotDto)
         .expect(200);
 
@@ -149,14 +150,14 @@ describe('Password Reset (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send(forgotDto)
         .expect(400);
     });
 
     it('should reject missing email', async () => {
       await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send({})
         .expect(400);
     });
@@ -167,7 +168,7 @@ describe('Password Reset (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send(forgotDto)
         .expect(200);
 
@@ -188,7 +189,7 @@ describe('Password Reset (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send(forgotDto)
         .expect(200);
 
@@ -199,7 +200,7 @@ describe('Password Reset (e2e)', () => {
     });
   });
 
-  describe('POST /auth/reset-password', () => {
+  describe('POST /api/v1/auth/reset-password', () => {
     beforeEach(async () => {
       // Set up user with valid reset token
       const futureDate = new Date();
@@ -222,7 +223,7 @@ describe('Password Reset (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send(resetDto)
         .expect(200);
 
@@ -239,7 +240,7 @@ describe('Password Reset (e2e)', () => {
 
       // Should be able to login with new password
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUser.email,
           password: newPassword,
@@ -256,7 +257,7 @@ describe('Password Reset (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send(resetDto)
         .expect(400);
 
@@ -282,7 +283,7 @@ describe('Password Reset (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send(resetDto)
         .expect(400);
 
@@ -306,7 +307,7 @@ describe('Password Reset (e2e)', () => {
         };
 
         await request(app.getHttpServer())
-          .post('/auth/reset-password')
+          .post('/api/v1/auth/reset-password')
           .send(resetDto)
           .expect(400);
       }
@@ -315,19 +316,19 @@ describe('Password Reset (e2e)', () => {
     it('should reject missing fields', async () => {
       // Missing token
       await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({ newPassword: 'NewPassword123!' })
         .expect(400);
 
       // Missing newPassword
       await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({ token: validResetToken })
         .expect(400);
 
       // Empty body
       await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({})
         .expect(400);
     });
@@ -340,13 +341,13 @@ describe('Password Reset (e2e)', () => {
 
       // First reset should succeed
       await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send(resetDto)
         .expect(200);
 
       // Second attempt with same token should fail
       const response = await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: validResetToken,
           newPassword: 'AnotherPassword123!',
@@ -363,13 +364,13 @@ describe('Password Reset (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send(resetDto)
         .expect(200);
 
       // Try to login with old password
       await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUser.email,
           password: testUser.password, // Old password
@@ -386,7 +387,7 @@ describe('Password Reset (e2e)', () => {
       // Send multiple concurrent requests
       const requests = Array(5).fill(null).map(() =>
         request(app.getHttpServer())
-          .post('/auth/reset-password')
+          .post('/api/v1/auth/reset-password')
           .send(resetDto)
       );
 
@@ -410,7 +411,7 @@ describe('Password Reset (e2e)', () => {
 
       // Should either accept or reject based on max length policy
       await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send(resetDto);
       // Not asserting status as it depends on password policy
     });
@@ -424,7 +425,7 @@ describe('Password Reset (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send(resetDto)
         .expect(200);
 
@@ -436,7 +437,7 @@ describe('Password Reset (e2e)', () => {
     it('should complete full password reset flow', async () => {
       // Step 1: Request password reset
       await request(app.getHttpServer())
-        .post('/auth/forgot-password')
+        .post('/api/v1/auth/forgot-password')
         .send({ email: testUser.email })
         .expect(200);
 
@@ -449,7 +450,7 @@ describe('Password Reset (e2e)', () => {
       // Step 3: Reset password with token
       const newPassword = 'CompletelyNewPassword123!';
       await request(app.getHttpServer())
-        .post('/auth/reset-password')
+        .post('/api/v1/auth/reset-password')
         .send({
           token: resetToken,
           newPassword: newPassword,
@@ -458,7 +459,7 @@ describe('Password Reset (e2e)', () => {
 
       // Step 4: Login with new password
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUser.email,
           password: newPassword,

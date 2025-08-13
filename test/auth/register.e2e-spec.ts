@@ -14,6 +14,7 @@ describe('Auth Registration (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -52,7 +53,7 @@ describe('Auth Registration (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send(registerDto)
         .expect(201);
 
@@ -80,13 +81,13 @@ describe('Auth Registration (e2e)', () => {
 
       // Register first user
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send(registerDto)
         .expect(201);
 
       // Try to register with same email
       const response = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           ...registerDto,
           name: 'Second User',
@@ -104,7 +105,7 @@ describe('Auth Registration (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send(registerDto)
         .expect(400);
 
@@ -129,7 +130,7 @@ describe('Auth Registration (e2e)', () => {
         };
 
         const response = await request(app.getHttpServer())
-          .post('/auth/register')
+          .post('/api/v1/auth/register')
           .send(registerDto)
           .expect(400);
 
@@ -140,7 +141,7 @@ describe('Auth Registration (e2e)', () => {
     it('should reject registration with missing required fields', async () => {
       // Missing email
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           password: 'StrongPassword123!',
           name: 'Test User',
@@ -149,7 +150,7 @@ describe('Auth Registration (e2e)', () => {
 
       // Missing password
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'test@example.com',
           name: 'Test User',
@@ -158,7 +159,7 @@ describe('Auth Registration (e2e)', () => {
 
       // Missing name
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'test@example.com',
           password: 'StrongPassword123!',
@@ -174,7 +175,7 @@ describe('Auth Registration (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send(registerDto)
         .expect(400);
 
@@ -190,13 +191,13 @@ describe('Auth Registration (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send(registerDto)
         .expect(201);
 
       // Try to register with same email in different case
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send({
           ...registerDto,
           email: 'test.user@example.com',
@@ -212,7 +213,7 @@ describe('Auth Registration (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send(registerDto)
         .expect(201);
 
@@ -229,7 +230,7 @@ describe('Auth Registration (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send(registerDto)
         .expect(201);
 
@@ -245,7 +246,7 @@ describe('Auth Registration (e2e)', () => {
       };
 
       await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send(registerDto)
         .expect(400);
     });
@@ -258,7 +259,7 @@ describe('Auth Registration (e2e)', () => {
       };
 
       const response = await request(app.getHttpServer())
-        .post('/auth/register')
+        .post('/api/v1/auth/register')
         .send(registerDto)
         .expect(201);
 
@@ -276,7 +277,7 @@ describe('Auth Registration (e2e)', () => {
       // Send multiple concurrent requests
       const requests = Array(5).fill(null).map(() =>
         request(app.getHttpServer())
-          .post('/auth/register')
+          .post('/api/v1/auth/register')
           .send(registerDto)
       );
 

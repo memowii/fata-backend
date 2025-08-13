@@ -28,6 +28,7 @@ describe('JWT Authentication (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -78,7 +79,7 @@ describe('JWT Authentication (e2e)', () => {
 
     // Login to get valid tokens
     const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
+      .post('/api/v1/auth/login')
       .send({
         email: testUser.email,
         password: testUser.password,
@@ -91,7 +92,7 @@ describe('JWT Authentication (e2e)', () => {
   describe('Protected Routes', () => {
     it('should allow access to protected route with valid token', async () => {
       const response = await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/api/v1/auth/me')
         .set('Authorization', `Bearer ${validAccessToken}`)
         .expect(200);
 
@@ -105,20 +106,20 @@ describe('JWT Authentication (e2e)', () => {
 
     it('should reject access without token', async () => {
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/api/v1/auth/me')
         .expect(401);
     });
 
     it('should reject access with invalid token', async () => {
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/api/v1/auth/me')
         .set('Authorization', 'Bearer invalid-token')
         .expect(401);
     });
 
     it('should reject access with expired token', async () => {
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/api/v1/auth/me')
         .set('Authorization', `Bearer ${expiredAccessToken}`)
         .expect(401);
     });
@@ -126,19 +127,19 @@ describe('JWT Authentication (e2e)', () => {
     it('should reject access with malformed authorization header', async () => {
       // Missing "Bearer" prefix
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/api/v1/auth/me')
         .set('Authorization', validAccessToken)
         .expect(401);
 
       // Wrong prefix
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/api/v1/auth/me')
         .set('Authorization', `Token ${validAccessToken}`)
         .expect(401);
 
       // Empty bearer
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/api/v1/auth/me')
         .set('Authorization', 'Bearer ')
         .expect(401);
     });
@@ -150,7 +151,7 @@ describe('JWT Authentication (e2e)', () => {
       );
 
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/api/v1/auth/me')
         .set('Authorization', `Bearer ${wrongSecretToken}`)
         .expect(401);
     });
@@ -159,7 +160,7 @@ describe('JWT Authentication (e2e)', () => {
   describe('Token Refresh', () => {
     it('should successfully refresh tokens with valid refresh token', async () => {
       const response = await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Authorization', `Bearer ${validRefreshToken}`)
         .expect(200);
 
@@ -174,27 +175,27 @@ describe('JWT Authentication (e2e)', () => {
 
       // New access token should work
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/api/v1/auth/me')
         .set('Authorization', `Bearer ${response.body.accessToken}`)
         .expect(200);
     });
 
     it('should reject refresh with invalid refresh token', async () => {
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Authorization', 'Bearer invalid-refresh-token')
         .expect(403);
     });
 
     it('should reject refresh without token', async () => {
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .expect(401);
     });
 
     it('should reject refresh with access token instead of refresh token', async () => {
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Authorization', `Bearer ${validAccessToken}`)
         .expect(403);
     });
@@ -202,19 +203,19 @@ describe('JWT Authentication (e2e)', () => {
     it('should invalidate old refresh token after use', async () => {
       // First refresh should succeed
       const response1 = await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Authorization', `Bearer ${validRefreshToken}`)
         .expect(200);
 
       // Try to use old refresh token again - should fail
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Authorization', `Bearer ${validRefreshToken}`)
         .expect(403);
 
       // New refresh token should work
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Authorization', `Bearer ${response1.body.refreshToken}`)
         .expect(200);
     });
@@ -223,7 +224,7 @@ describe('JWT Authentication (e2e)', () => {
       // Send multiple concurrent refresh requests
       const requests = Array(5).fill(null).map(() =>
         request(app.getHttpServer())
-          .post('/auth/refresh')
+          .post('/api/v1/auth/refresh')
           .set('Authorization', `Bearer ${validRefreshToken}`)
       );
 
@@ -242,39 +243,39 @@ describe('JWT Authentication (e2e)', () => {
     it('should successfully logout and invalidate refresh token', async () => {
       // Logout
       await request(app.getHttpServer())
-        .post('/auth/logout')
+        .post('/api/v1/auth/logout')
         .set('Authorization', `Bearer ${validAccessToken}`)
         .expect(200);
 
       // Refresh token should no longer work
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Authorization', `Bearer ${validRefreshToken}`)
         .expect(403);
 
       // Access token should still work until it expires
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/api/v1/auth/me')
         .set('Authorization', `Bearer ${validAccessToken}`)
         .expect(200);
     });
 
     it('should require authentication for logout', async () => {
       await request(app.getHttpServer())
-        .post('/auth/logout')
+        .post('/api/v1/auth/logout')
         .expect(401);
     });
 
     it('should handle multiple logout attempts', async () => {
       // First logout
       await request(app.getHttpServer())
-        .post('/auth/logout')
+        .post('/api/v1/auth/logout')
         .set('Authorization', `Bearer ${validAccessToken}`)
         .expect(200);
 
       // Second logout should also succeed (idempotent)
       await request(app.getHttpServer())
-        .post('/auth/logout')
+        .post('/api/v1/auth/logout')
         .set('Authorization', `Bearer ${validAccessToken}`)
         .expect(200);
     });
@@ -302,7 +303,7 @@ describe('JWT Authentication (e2e)', () => {
       const tamperedToken = parts.join('.');
 
       await request(app.getHttpServer())
-        .get('/auth/me')
+        .get('/api/v1/auth/me')
         .set('Authorization', `Bearer ${tamperedToken}`)
         .expect(401);
     });
@@ -320,7 +321,7 @@ describe('JWT Authentication (e2e)', () => {
 
       for (const token of invalidTokens) {
         await request(app.getHttpServer())
-          .get('/auth/me')
+          .get('/api/v1/auth/me')
           .set('Authorization', `Bearer ${token}`)
           .expect(401);
       }
@@ -330,7 +331,7 @@ describe('JWT Authentication (e2e)', () => {
   describe('Session Management', () => {
     it('should create session on login', async () => {
       const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post('/api/v1/auth/login')
         .send({
           email: testUser.email,
           password: testUser.password,
@@ -366,7 +367,7 @@ describe('JWT Authentication (e2e)', () => {
 
       // Try to use expired refresh token
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Authorization', 'Bearer expired-token')
         .expect(403);
     });
@@ -377,7 +378,7 @@ describe('JWT Authentication (e2e)', () => {
       
       for (let i = 0; i < 3; i++) {
         const response = await request(app.getHttpServer())
-          .post('/auth/login')
+          .post('/api/v1/auth/login')
           .send({
             email: testUser.email,
             password: testUser.password,
@@ -392,26 +393,26 @@ describe('JWT Authentication (e2e)', () => {
       // All sessions should work
       for (const session of sessions) {
         await request(app.getHttpServer())
-          .get('/auth/me')
+          .get('/api/v1/auth/me')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .expect(200);
       }
 
       // Logout from one session shouldn't affect others
       await request(app.getHttpServer())
-        .post('/auth/logout')
+        .post('/api/v1/auth/logout')
         .set('Authorization', `Bearer ${sessions[0].accessToken}`)
         .expect(200);
 
       // First session refresh should fail
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Authorization', `Bearer ${sessions[0].refreshToken}`)
         .expect(403);
 
       // Other sessions should still work
       await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post('/api/v1/auth/refresh')
         .set('Authorization', `Bearer ${sessions[1].refreshToken}`)
         .expect(200);
     });
