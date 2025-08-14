@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .button-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .verify-button {
+            display: inline-block;
+            padding: 14px 40px;
+            background: #2c3e50;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+            border: 2px solid #1a252f;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .verify-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            background: #1a252f;
+            color: #ffffff !important;
+        }
+        .alternative {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .alternative p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .alternative .link {
+            word-break: break-all;
+            color: #667eea;
+            font-size: 13px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        .footer p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #999;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 3px;
+        }
+        .warning p {
+            margin: 0;
+            color: #856404;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to {{appName}}</h1>
+        </div>
+        <div class="content">
+            <p class="greeting">Hi {{name}},</p>
+            <p class="message">
+                Thank you for signing up! We're excited to have you on board. 
+                Please verify your email address to complete your registration and access all features.
+            </p>
+            
+            <div class="button-container">
+                <a href="{{verificationUrl}}" class="verify-button">Verify Email Address</a>
+            </div>
+
+            <div class="warning">
+                <p>This verification link will expire in {{expiresIn}}. Please verify your email before then.</p>
+            </div>
+
+            <div class="alternative">
+                <p>If the button above doesn't work, you can also verify your email by copying and pasting this link into your browser:</p>
+                <p class="link">{{verificationUrl}}</p>
+            </div>
+
+            <p class="message">
+                If you didn't create an account with us, please ignore this email. 
+                No further action is required on your part.
+            </p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message, please do not reply to this email.</p>
+            <p>&copy; {{currentYear}} {{appName}}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

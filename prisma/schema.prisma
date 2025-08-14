@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String    @id @default(uuid())
+  email                  String    @unique
+  passwordHash           String    @map("password_hash")
+  name                   String?
+  emailVerified          Boolean   @default(false) @map("email_verified")
+  emailVerificationToken String?   @unique @map("email_verification_token")
+  passwordResetToken     String?   @unique @map("password_reset_token")
+  passwordResetExpires   DateTime? @map("password_reset_expires")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+  lastLogin              DateTime? @map("last_login")
+  preferences            Json      @default("{}") @db.Json
+  failedLoginAttempts    Int       @default(0) @map("failed_login_attempts")
+  lockedUntil            DateTime? @map("locked_until")
+
+  // Relations
+  sessions Session[]
+
+  @@index([email])
+  @@index([emailVerificationToken])
+  @@index([passwordResetToken])
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  refreshToken String   @unique @map("refresh_token")
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([refreshToken])
+  @@index([expiresAt])
+  @@map("sessions")
+}

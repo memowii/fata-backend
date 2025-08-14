@@ -47,6 +47,43 @@ rebuild: ## Rebuild containers without cache
 logs: ## Show container logs
 	$(DOCKER_COMPOSE) logs -f app
 
+# Package Management Commands
+.PHONY: yarn
+yarn: ## Run yarn command in container (usage: make yarn cmd="add express")
+	@if [ -z "$(cmd)" ]; then \
+		echo "$(RED)Error: No command specified. Usage: make yarn cmd=\"add express\"$(NC)"; \
+		exit 1; \
+	fi
+	@./scripts/yarn-docker.sh $(cmd)
+
+.PHONY: yarn-add
+yarn-add: ## Add a package (usage: make yarn-add pkg="express")
+	@if [ -z "$(pkg)" ]; then \
+		echo "$(RED)Error: No package specified. Usage: make yarn-add pkg=\"express\"$(NC)"; \
+		exit 1; \
+	fi
+	@./scripts/yarn-docker.sh add $(pkg)
+
+.PHONY: yarn-add-dev
+yarn-add-dev: ## Add a dev dependency (usage: make yarn-add-dev pkg="@types/node")
+	@if [ -z "$(pkg)" ]; then \
+		echo "$(RED)Error: No package specified. Usage: make yarn-add-dev pkg=\"@types/node\"$(NC)"; \
+		exit 1; \
+	fi
+	@./scripts/yarn-docker.sh add -D $(pkg)
+
+.PHONY: yarn-remove
+yarn-remove: ## Remove a package (usage: make yarn-remove pkg="express")
+	@if [ -z "$(pkg)" ]; then \
+		echo "$(RED)Error: No package specified. Usage: make yarn-remove pkg=\"express\"$(NC)"; \
+		exit 1; \
+	fi
+	@./scripts/yarn-docker.sh remove $(pkg)
+
+.PHONY: sync-packages
+sync-packages: ## Sync package.json and yarn.lock from container to host
+	@./scripts/sync-packages.sh from-container
+
 .PHONY: shell
 shell: ## Access container shell
 	$(DOCKER_COMPOSE) exec app sh
@@ -142,3 +179,9 @@ logs-db: ## Show PostgreSQL logs
 .PHONY: logs-redis
 logs-redis: ## Show Redis logs
 	$(DOCKER_COMPOSE) logs -f redis
+
+.PHONY: update-api-docs
+update-api-docs: ## Download OpenAPI spec to documentation folder
+	@mkdir -p documentation
+	curl -s http://localhost:5000/api/v1-json | jq '.' > documentation/api-docs-v1.json
+	@echo "$(GREEN)API v1 documentation updated at documentation/api-docs-v1.json$(NC)"

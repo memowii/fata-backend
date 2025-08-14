@@ -1,0 +1,22 @@
+# Docker Compose Override for better package synchronization
+# This file is automatically loaded by docker-compose and overrides settings in docker-compose.yml
+
+services:
+  app:
+    volumes:
+      # Mount source code for hot reload
+      - ./src:/usr/src/app/src:delegated
+      - ./test:/usr/src/app/test:delegated
+      - ./prisma:/usr/src/app/prisma:delegated
+      # Mount config files with delegated for better performance
+      - ./tsconfig.json:/usr/src/app/tsconfig.json:delegated
+      - ./tsconfig.build.json:/usr/src/app/tsconfig.build.json:delegated
+      - ./nest-cli.json:/usr/src/app/nest-cli.json:delegated
+      # Use delegated mode for package files to allow container writes
+      - ./package.json:/usr/src/app/package.json:delegated
+      - ./yarn.lock:/usr/src/app/yarn.lock:delegated
+      # Prevent node_modules from being overwritten by volume mount
+      - /usr/src/app/node_modules
+    # Add environment variable to help identify when running in Docker
+    environment:
+      - RUNNING_IN_DOCKER=true

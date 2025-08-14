@@ -83,6 +83,7 @@ yarn test:debug
 - **Entry Point**: `src/main.ts` - Bootstraps the application on port from `PORT` env variable or 5000
 - **Root Module**: `src/app.module.ts` - Main application module with ConfigModule for environment variables
 - **Configuration**: Uses `@nestjs/config` for environment variable management
+- **API Versioning**: Uses URL-based versioning with `/api/v1` prefix for all endpoints
 
 ### Key Technologies
 - **Framework**: NestJS 11.x with Express adapter
@@ -120,3 +121,57 @@ To get started with Docker:
 4. PostgreSQL at `localhost:5432` and Redis at `localhost:6379`
 
 See `DOCKER.md` for detailed Docker documentation and `Makefile` for available commands.
+
+## Important Learnings and Best Practices
+
+### Package Management in Docker
+- **Always use Make commands for package management**: `make yarn-add pkg="package-name"`
+- **Never run yarn directly in host**: Packages must be installed in container
+- **Sync issues**: If package.json gets out of sync, run `make sync-packages`
+- **Check both locations**: Verify packages exist in both container and host package.json
+
+### NestJS Build Configuration
+- **Template files need special handling**: Add to nest-cli.json:
+  ```json
+  "compilerOptions": {
+    "assets": [{"include": "**/*.hbs", "watchAssets": true}]
+  }
+  ```
+- **Build output structure**: Compiled files go to `dist/` but may have different paths than source
+- **Static files**: Place templates and assets that need copying in src folder
+
+### Email Service with AWS SES
+- **Development mode**: System auto-detects missing AWS credentials and simulates emails
+- **Sandbox limitations**: Can only send to verified emails until production access granted
+- **Template paths**: Email templates may need hardcoded paths due to build variations
+- **Always verify**: Check logs for "MessageId" to confirm SES sending
+
+### API Endpoints
+- **API Version**: All endpoints use `/api/v1` prefix for versioning
+- **Base path**: Register endpoint is `POST /api/v1/auth/register`
+- **Swagger docs**: Available at `http://localhost:5000/api/v1`
+- **Raw API spec**: Available at `http://localhost:5000/api/v1-json`
+- **Versioning Strategy**: API uses URL-based versioning (e.g., `/api/v1`, `/api/v2`)
+
+### Docker Volume Mounting
+- **package.json and yarn.lock need special handling**: Use delegated mounts
+- **Hot reload works for src/**: TypeScript files auto-compile on change
+- **Templates need restart**: After modifying .hbs files, restart container
+
+### Debugging in Docker
+- **Always check logs first**: `docker compose logs app | grep -i error`
+- **Container health**: Verify with `curl http://localhost:5000/health`
+- **TypeScript errors prevent startup**: Fix compilation errors before container runs
+- **Environment variables**: Restart container after .env changes
+
+### Testing Email Templates
+- **Use simple passwords for testing**: Avoid special characters in curl commands
+- **Test with verified emails**: In AWS SES sandbox, recipient must be verified
+- **Check template loading**: Look for "Successfully loaded X email templates" in logs
+- **Button visibility**: Use dark solid colors (#2c3e50) not light gradients
+
+### Common Pitfalls to Avoid
+- **Don't assume package installation persists**: Always check package.json
+- **Don't trust TypeScript path resolution**: May need explicit paths in runtime
+- **Don't skip log checking**: Many issues are clearly shown in logs
+- **Don't use complex passwords in curl**: JSON escaping causes issues
