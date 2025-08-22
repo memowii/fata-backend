@@ -18,6 +18,8 @@ RUN yarn install --frozen-lockfile
 FROM dependencies AS build
 # Copy source code
 COPY . .
+# Generate Prisma client
+RUN npx prisma generate
 # Build the application
 RUN yarn build
 
@@ -25,6 +27,10 @@ RUN yarn build
 FROM base AS production-dependencies
 # Install only production dependencies
 RUN yarn install --frozen-lockfile --production
+# Copy necessary files for Prisma generation
+COPY prisma ./prisma
+# Generate Prisma client
+RUN npx prisma generate
 
 # Development stage - for local development with hot reload
 FROM base AS development
@@ -32,6 +38,8 @@ FROM base AS development
 RUN yarn install --frozen-lockfile
 # Copy source code
 COPY . .
+# Generate Prisma client
+RUN npx prisma generate
 # Expose port
 EXPOSE 5000
 # Use dumb-init to handle signals properly
