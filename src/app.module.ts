@@ -25,7 +25,7 @@ import { EmailModule } from './email/email.module';
       useFactory: async (configService: ConfigService) => ({
         redis: {
           host: configService.get('REDIS_HOST', 'redis'),
-          port: configService.get('REDIS_PORT', 6379),
+          port: configService.get('REDIS_INTERNAL_PORT', 6379),
           password: configService.get('REDIS_PASSWORD'),
         },
       }),
