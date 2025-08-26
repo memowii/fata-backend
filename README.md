@@ -42,6 +42,29 @@ docker compose up
 
 See [DOCKER.md](./DOCKER.md) for detailed Docker instructions.
 
+## Package Management in Docker
+
+Since the application runs in Docker containers, use these commands to manage packages:
+
+```bash
+# Add a package
+make yarn-add pkg="express"
+
+# Add a dev dependency
+make yarn-add-dev pkg="@types/node"
+
+# Remove a package
+make yarn-remove pkg="express"
+
+# Run any yarn command
+make yarn cmd="upgrade"
+
+# Sync package files if out of sync
+make sync-packages
+```
+
+See [PACKAGE_MANAGEMENT.md](./PACKAGE_MANAGEMENT.md) for detailed package management instructions.
+
 ## Project setup (Without Docker)
 
 ```bash
